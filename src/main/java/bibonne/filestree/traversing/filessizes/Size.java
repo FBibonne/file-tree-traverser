@@ -1,4 +1,4 @@
-package bibonne.files.sizebrowsing;
+package bibonne.filestree.traversing.filessizes;
 
 public record Size(long value) {
 

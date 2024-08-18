@@ -2,22 +2,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-dependencies</artifactId>
-		<version>3.2.1</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>bibonne.exp.files</groupId>
-	<artifactId>size-browsing</artifactId>
+	<groupId>bibonne.exp</groupId>
+	<artifactId>file-tree-traverser</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Size browsing of local file system</name>
-	<description>Browse the local file system to capture the sizes of files and directories</description>
+	<name>Traverse file tree</name>
+	<description>Use java structured concurency to walk all files of a directory (a drive) and execute an action for each file (for example calculate size)</description>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>22</java.version>
 	</properties>
 	<dependencies>
-	</dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
@@ -37,8 +43,8 @@
 					<archive>
 						<manifest>
 							<mainClass>
-								bibonne.files.sizebrowsing.BrowseFilesForSizes
-							</mainClass>
+                                bibonne.filestree.traversing.Traverse
+                            </mainClass>
 						</manifest>
 					</archive>
 				</configuration>

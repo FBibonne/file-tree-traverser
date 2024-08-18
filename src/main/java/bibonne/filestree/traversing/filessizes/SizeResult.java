@@ -1,7 +1,9 @@
-package bibonne.files.sizebrowsing;
+package bibonne.filestree.traversing.filessizes;
+
+import bibonne.filestree.traversing.BrowseResult;
+import bibonne.filestree.traversing.FilesUtils;
 
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -10,43 +12,62 @@ import java.util.stream.Collectors;
 import static java.util.FormatProcessor.FMT;
 import static java.util.Objects.requireNonNull;
 
-public class BrowseResult{
+public class SizeResult implements BrowseResult {
 
     private static final double TO_GIGA_COEFF = Math.pow(1024, 3);
+    public static final long THREATHOLD = 1_000_000_000L;
     private final Path directory;
+    private final FilesUtils filesUtils;
 
     private Size totalSize=new Size(0);
 
     private Size negileableSize=new Size(0);
 
-    private Set<BrowseResult> children;
+    private Set<SizeResult> children;
 
 
-    public static BrowseResult root(Path rootDirectory){
-        return new BrowseResult(rootDirectory,  new HashSet<>());
+    public static SizeResult root(Path rootDirectory, FilesUtils filesUtils) {
+        return new SizeResult(rootDirectory,  new HashSet<>(), filesUtils);
     }
 
-    public BrowseResult child(Path childDirectory){
-        var retour= new BrowseResult(childDirectory,  new HashSet<>());
+    @Override
+    public SizeResult child(Path childDirectory){
+        var retour= new SizeResult(childDirectory,  new HashSet<>(), filesUtils);
         children.add(retour);
         return retour;
     }
 
 
-    private BrowseResult(Path directory, Set<BrowseResult> children) {
+    private SizeResult(Path directory, Set<SizeResult> children, FilesUtils filesUtils) {
         this.directory = requireNonNull(directory);
         this.children = requireNonNull(children);
+        this.filesUtils = requireNonNull(filesUtils);
     }
 
-    public Path getDirectory() {
+    public Path currentDirectory() {
         return directory;
     }
 
-    public void addNegligeableSize(long size) {
+    @Override
+    public void addFilePath(Path path) {
+        addNegligeableSize(size(path));
+    }
+
+    private long size(Path path) {
+        return filesUtils.size(path);
+    }
+
+    @Override
+    public SizeResult afterTraverse() {
+        updateSizes();
+        return this;
+    }
+
+    private void addNegligeableSize(long size) {
         this.negileableSize=this.negileableSize.add(size);
     }
 
-    public void updateSizes() {
+    private void updateSizes() {
         children=children.stream()
                 .filter(browseResult -> {
                     if(browseResult.isNegligeable()){
@@ -61,20 +82,20 @@ public class BrowseResult{
     }
 
     public boolean isNegligeable() {
-        return totalSize.value() < BrowseForSizes.THREATHOLD;
+        return totalSize.value() < THREATHOLD;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BrowseResult that = (BrowseResult) o;
-        return Objects.equals(getDirectory(), that.getDirectory());
+        SizeResult that = (SizeResult) o;
+        return Objects.equals(currentDirectory(), that.currentDirectory());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDirectory());
+        return Objects.hash(currentDirectory());
     }
 
 
