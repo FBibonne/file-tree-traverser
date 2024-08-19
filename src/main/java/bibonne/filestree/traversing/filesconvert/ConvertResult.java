@@ -1,21 +1,23 @@
 package bibonne.filestree.traversing.filesconvert;
 
 import bibonne.filestree.traversing.BrowseResult;
+import bibonne.filestree.traversing.FilesUtils;
+import bibonne.filestree.traversing.external.FilesUtilsFromJavaFiles;
 
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 
-public record ConvertResult(Path currentDirectory, MusicConverter musicConverter) implements BrowseResult {
+public record ConvertResult(Path currentDirectory, MusicConverter musicConverter, FilesUtils filesUtils) implements BrowseResult {
     private static final Set<String> MUSIC_EXTENSION = Set.of("mp3", "wma", "wav", "flac", "opus", "ogg");
 
     public ConvertResult(Path currentDirectory){
-        this(currentDirectory, new MusicConverter());
+        this(currentDirectory, new MusicConverter(), new FilesUtilsFromJavaFiles());
     }
 
     @Override
     public BrowseResult child(Path childDirectory) {
-        return new ConvertResult(childDirectory, musicConverter);
+        return new ConvertResult(childDirectory, musicConverter, filesUtils);
     }
 
     @Override
@@ -26,7 +28,11 @@ public record ConvertResult(Path currentDirectory, MusicConverter musicConverter
     }
 
     private void convertToMp3(Path path) {
-        this.musicConverter.convert(path.getParent(), path.getFileName(), newFilenameWithMp3(path));
+        if (this.musicConverter.convert(path.getParent(), path.getFileName(), newFilenameWithMp3(path))){
+            filesUtils.delete(path);
+        }else {
+            System.err.println(STR."ERROR while converting file \{path} to mp3 file");
+        }
     }
 
     private String newFilenameWithMp3(Path path) {

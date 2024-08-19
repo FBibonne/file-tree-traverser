@@ -32,4 +32,13 @@ public record FilesUtilsFromJavaFiles()implements FilesUtils {
             return 0;
         }
     }
+
+    @Override
+    public void delete(Path path) {
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

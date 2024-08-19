@@ -9,4 +9,6 @@ public interface FilesUtils {
     Stream<Path> list(Path directory);
 
     long size(Path path);
+
+    void delete(Path path);
 }

@@ -5,9 +5,10 @@ import bibonne.filestree.traversing.external.FilesUtilsFromJavaFiles;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.stream.Stream;
 
-public record FilesUtilsMock(FilesUtilsFromJavaFiles delegate) implements FilesUtils {
+public record FilesUtilsMock(FilesUtilsFromJavaFiles delegate, List<Path> deletedSpy) implements FilesUtils {
 
     @Override
     public boolean isDirectory(Path path) {
@@ -27,4 +28,11 @@ public record FilesUtilsMock(FilesUtilsFromJavaFiles delegate) implements FilesU
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void delete(Path path) {
+        deletedSpy.add(path);
+    }
+
+
 }

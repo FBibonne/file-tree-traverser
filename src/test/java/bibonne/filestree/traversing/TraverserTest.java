@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +47,7 @@ class TraverserTest {
     @Test
     void call_withSizeResult() throws Exception {
         Path root = Path.of(TraverserTest.class.getClassLoader().getResource(".").toURI());
-        FilesUtils filesUtils = new FilesUtilsMock(new FilesUtilsFromJavaFiles());
+        FilesUtils filesUtils = new FilesUtilsMock(new FilesUtilsFromJavaFiles(), List.of());
         SizeResult sizeResult = SizeResult.root(root, filesUtils);
         var traverser= Traverser.forBrowseResult(sizeResult);
         assertThat(traverser.call()).hasToString("""
@@ -74,10 +75,14 @@ class TraverserTest {
         new ConverterCall(root.resolve("flac/mano negra"), Path.of("a.flac"), "a.mp3")
         );
         ConverterSpyer converterSpyer = new ConverterSpyer();
-        ConvertResult convertResult = new ConvertResult(root, converterSpyer);
+        List<Path> deletedSpy=Collections.synchronizedList(new ArrayList<>());
+        FilesUtilsMock filesUtils = new FilesUtilsMock(new FilesUtilsFromJavaFiles(), deletedSpy);
+        ConvertResult convertResult = new ConvertResult(root, converterSpyer, filesUtils);
         Traverser.forBrowseResult(convertResult).call();
         assertThat(converterSpyer.spy).hasSize(expectedCalls.size())
                 .containsAll(expectedCalls);
+        assertThat(deletedSpy).hasSize(expectedCalls.size())
+                .containsAll(expectedCalls.stream().map(call->call.directory.resolve(call.srcFile)).toList());
     }
 
     record ConverterCall(Path directory, Path srcFile, String targetFilename) {
@@ -85,11 +90,12 @@ class TraverserTest {
 
     static class ConverterSpyer extends MusicConverter{
 
-        List<ConverterCall> spy = new ArrayList<>();
+        List<ConverterCall> spy = Collections.synchronizedList(new ArrayList<>());
 
         @Override
-        public void convert(Path directory, Path fileName, String targetFilename) {
+        public boolean convert(Path directory, Path fileName, String targetFilename) {
             spy.add(new ConverterCall(directory, fileName, targetFilename));
+            return true;
         }
 
     }
