@@ -1,4 +1,4 @@
-package bibonne.filestree.traversing;
+package bibonne.filestree.traverser;
 
 import java.nio.file.Path;
 

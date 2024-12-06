@@ -1,8 +1,8 @@
-package bibonne.filestree.traversing.filesconvert;
+package bibonne.filestree.convertmusic;
 
-import bibonne.filestree.traversing.BrowseResult;
-import bibonne.filestree.traversing.FilesUtils;
-import bibonne.filestree.traversing.external.FilesUtilsFromJavaFiles;
+import bibonne.filestree.traverser.BrowseResult;
+import bibonne.filestree.utils.FilesUtils;
+import bibonne.filestree.external.FilesUtilsFromJdkFiles;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -12,7 +12,7 @@ public record ConvertResult(Path currentDirectory, MusicConverter musicConverter
     private static final Set<String> MUSIC_EXTENSION = Set.of("mp3", "wma", "wav", "flac", "opus", "ogg");
 
     public ConvertResult(Path currentDirectory){
-        this(currentDirectory, new MusicConverter(), new FilesUtilsFromJavaFiles());
+        this(currentDirectory, new MusicConverter(), new FilesUtilsFromJdkFiles());
     }
 
     @Override
@@ -29,7 +29,7 @@ public record ConvertResult(Path currentDirectory, MusicConverter musicConverter
 
     private void convertToMp3(Path path) {
         if (this.musicConverter.convert(path.getParent(), path.getFileName(), newFilenameWithMp3(path))){
-            filesUtils.delete(path);
+            filesUtils.deleteSafely(path);
         }else {
             System.err.println(STR."ERROR while converting file \{path} to mp3 file");
         }

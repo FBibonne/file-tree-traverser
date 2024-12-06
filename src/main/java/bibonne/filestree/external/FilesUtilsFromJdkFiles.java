@@ -1,18 +1,18 @@
-package bibonne.filestree.traversing.external;
+package bibonne.filestree.external;
 
-import bibonne.filestree.traversing.FilesUtils;
+import bibonne.filestree.utils.FilesUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-public record FilesUtilsFromJavaFiles()implements FilesUtils {
-    @Override public boolean isDirectory(Path path) {
+public record FilesUtilsFromJdkFiles()implements FilesUtils {
+    @Override public boolean isDirectorySafely(Path path) {
         return path!=null && Files.isDirectory(path);
     }
 
-    @Override public Stream<Path> list(Path directory) {
+    @Override public Stream<Path> listSafely(Path directory) {
         if (directory == null) {
             return Stream.empty();
         }
@@ -25,7 +25,7 @@ public record FilesUtilsFromJavaFiles()implements FilesUtils {
     }
 
     @Override
-    public long size(Path path) {
+    public long sizeSafely(Path path) {
         try {
             return Files.size(path);
         } catch (IOException e) {
@@ -34,7 +34,7 @@ public record FilesUtilsFromJavaFiles()implements FilesUtils {
     }
 
     @Override
-    public void delete(Path path) {
+    public void deleteSafely(Path path) {
         try {
             Files.delete(path);
         } catch (IOException e) {

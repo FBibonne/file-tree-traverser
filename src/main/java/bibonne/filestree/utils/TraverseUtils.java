@@ -1,13 +1,13 @@
-package bibonne.filestree.traversing;
+package bibonne.filestree.utils;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
-class TraverseUtils {
+public class TraverseUtils {
 
     private TraverseUtils() {}
 
-    static Path getRootPath(String[] args) {
+    public static Path getRootPath(String[] args) {
         return args.length > 0 ? Path.of(args[0]) : fileSystemRoot();
     }
 

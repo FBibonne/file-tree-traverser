@@ -1,10 +1,11 @@
-package bibonne.filestree.traversing;
+package bibonne.filestree;
 
-import bibonne.filestree.traversing.external.FilesUtilsFromJavaFiles;
-import bibonne.filestree.traversing.filesconvert.ConvertResult;
-import bibonne.filestree.traversing.filesconvert.MusicConverter;
-import bibonne.filestree.traversing.filessizes.SizeResult;
-import bibonne.filestree.traversing.internal.Traverser;
+import bibonne.filestree.external.FilesUtilsFromJdkFiles;
+import bibonne.filestree.convertmusic.ConvertResult;
+import bibonne.filestree.convertmusic.MusicConverter;
+import bibonne.filestree.size.SizeResult;
+import bibonne.filestree.traverser.Traverser;
+import bibonne.filestree.utils.FilesUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -47,9 +48,9 @@ class TraverserTest {
     @Test
     void call_withSizeResult() throws Exception {
         Path root = Path.of(TraverserTest.class.getClassLoader().getResource(".").toURI());
-        FilesUtils filesUtils = new FilesUtilsMock(new FilesUtilsFromJavaFiles(), List.of());
+        FilesUtils filesUtils = new FilesUtilsMock(new FilesUtilsFromJdkFiles(), List.of());
         SizeResult sizeResult = SizeResult.root(root, filesUtils);
-        var traverser= Traverser.forBrowseResult(sizeResult);
+        var traverser= Traverser.browseFor(sizeResult);
         assertThat(traverser.call()).hasToString("""
                 test-classes : 6.52
                   _NEG_ : 1.86
@@ -76,9 +77,9 @@ class TraverserTest {
         );
         ConverterSpyer converterSpyer = new ConverterSpyer();
         List<Path> deletedSpy=Collections.synchronizedList(new ArrayList<>());
-        FilesUtilsMock filesUtils = new FilesUtilsMock(new FilesUtilsFromJavaFiles(), deletedSpy);
+        FilesUtilsMock filesUtils = new FilesUtilsMock(new FilesUtilsFromJdkFiles(), deletedSpy);
         ConvertResult convertResult = new ConvertResult(root, converterSpyer, filesUtils);
-        Traverser.forBrowseResult(convertResult).call();
+        Traverser.browseFor(convertResult).call();
         assertThat(converterSpyer.spy).hasSize(expectedCalls.size())
                 .containsAll(expectedCalls);
         assertThat(deletedSpy).hasSize(expectedCalls.size())
