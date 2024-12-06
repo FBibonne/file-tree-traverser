@@ -1,4 +1,4 @@
-package bibonne.filestree.traversing.filesconvert;
+package bibonne.filestree.convertmusic;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -9,7 +9,7 @@ public class MusicConverter {
         //ffmpeg -y -i "$sansext.opus" "$sansext.flac"
         List<String> command = List.of("ffmpeg", "-y", "-i", fileName.toString(), targetFilename);
         ProcessBuilder pb = new ProcessBuilder(command);
-        System.out.println(STR."*** LAUNCH \{command} ***");
+        System.out.println("*** LAUNCH "+command+" ***");
         pb.directory(directory.toFile());
         pb.redirectErrorStream(true);
         try {
@@ -18,7 +18,7 @@ public class MusicConverter {
             process.waitFor();
             return process.exitValue() == 0;
         } catch (IOException | InterruptedException e) {
-            System.err.println(STR."Error \{e.getClass()} while processing \{fileName} : \{e.getMessage()}");
+            System.err.println("Error "+e.getClass()+" while processing "+fileName+" : "+e.getMessage());
             return false;
         }
     }
