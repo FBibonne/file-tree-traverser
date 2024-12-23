@@ -8,7 +8,7 @@ import static bibonne.filestree.utils.TraverseUtils.getRootPath;
 
 public class FileTreeSize {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         System.out.println(Traverser.browseFor(SizeResult.root(getRootPath(args), new FilesUtilsFromJdkFiles())));
     }
 }

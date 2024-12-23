@@ -21,14 +21,15 @@ record InternalTraverser(BrowseResult result, FilesUtils filesUtils) implements 
                 if (isDirectory(path)){
                     scope.fork(new InternalTraverser(result.child(path), filesUtils));
                 }else{
-                    result.addFilePath(path);
+                    result.processFile(path);
                 }
             });
             scope.join();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
-        return result.afterTraverse();
+        return result.aggregate();
     }
 
     private boolean isDirectory(Path path) {

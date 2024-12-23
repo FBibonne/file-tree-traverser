@@ -4,12 +4,9 @@ import bibonne.filestree.traverser.BrowseResult;
 import bibonne.filestree.utils.FilesUtils;
 
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
-import static java.util.FormatProcessor.FMT;
+import static java.lang.System.lineSeparator;
 import static java.util.Objects.requireNonNull;
 
 public class SizeResult implements BrowseResult {
@@ -17,30 +14,34 @@ public class SizeResult implements BrowseResult {
     private static final double TO_GIGA_COEFF = Math.pow(1024, 3);
     public static final long THREATHOLD = 1_000_000_000L;
     private final Path directory;
-    private final FilesUtils filesUtils;
+    protected final FilesUtils filesUtils;
 
     private Size totalSize=new Size(0);
 
     private Size negileableSize=new Size(0);
 
-    private Set<SizeResult> children;
+    private final List<SizeResult> children;
 
 
     public static SizeResult root(Path rootDirectory, FilesUtils filesUtils) {
-        return new SizeResult(rootDirectory,  new HashSet<>(), filesUtils);
+        return new SizeResult(rootDirectory, filesUtils);
     }
 
     @Override
-    public SizeResult child(Path childDirectory){
-        var retour= new SizeResult(childDirectory,  new HashSet<>(), filesUtils);
+    public SizeResult child(Path subdirectory){
+        var retour= newInstance(subdirectory);
         children.add(retour);
         return retour;
     }
 
+    SizeResult newInstance(Path subdirectory) {
+        return new SizeResult(subdirectory, filesUtils);
+    }
 
-    private SizeResult(Path directory, Set<SizeResult> children, FilesUtils filesUtils) {
+
+    protected SizeResult(Path directory, FilesUtils filesUtils) {
         this.directory = requireNonNull(directory);
-        this.children = requireNonNull(children);
+        this.children = new ArrayList<>();
         this.filesUtils = requireNonNull(filesUtils);
     }
 
@@ -48,8 +49,10 @@ public class SizeResult implements BrowseResult {
         return directory;
     }
 
+    Size totalSize() {return totalSize;}
+
     @Override
-    public void addFilePath(Path path) {
+    public void processFile(Path path) {
         addNegligeableSize(size(path));
     }
 
@@ -58,7 +61,7 @@ public class SizeResult implements BrowseResult {
     }
 
     @Override
-    public SizeResult afterTraverse() {
+    public SizeResult aggregate() {
         updateSizes();
         return this;
     }
@@ -67,17 +70,17 @@ public class SizeResult implements BrowseResult {
         this.negileableSize=this.negileableSize.add(size);
     }
 
-    private void updateSizes() {
-        children=children.stream()
-                .filter(browseResult -> {
-                    if(browseResult.isNegligeable()){
-                        this.negileableSize=negileableSize.add(browseResult.totalSize);
-                        return false;
-                    }
-                    this.totalSize=this.totalSize.add(browseResult.totalSize);
-                    return true;
-                })
-                .collect(Collectors.toSet());
+    void updateSizes() {
+        for (int i = 0; i < children.size(); i++) {
+            var child = children.get(i);
+            if (child.isNegligeable()){
+                negileableSize=negileableSize.add(child.totalSize());
+                children.remove(i);
+                i=i-1;
+            }else{
+                this.totalSize=this.totalSize.add(child.totalSize());
+            }
+        }
         this.totalSize=this.totalSize.add(this.negileableSize);
     }
 
@@ -105,17 +108,15 @@ public class SizeResult implements BrowseResult {
     }
 
     private StringBuilder toString(String indent) {
-        var toString=new StringBuilder(STR."""
-        \{indent}\{directoryName()} : \{toGigaString(totalSize)}
-        \{indent}  _NEG_ : \{toGigaString(negileableSize)}""");
+        var toString=new StringBuilder("""
+        %s%s : %.2f
+        %s  _NEG_ : %.2f"""
+                .formatted(indent, directoryName(), toGiga(totalSize), indent, toGiga(negileableSize))
+        );
         for (var browseResult:children){
-            toString.append('\n').append(browseResult.toString(STR."\{indent}  "));
+            toString.append(lineSeparator()).append(browseResult.toString(indent+"  "));
         }
         return toString;
-    }
-
-    private String toGigaString(Size size) {
-        return FMT."%.2f\{toGiga(size)}";
     }
 
     private String directoryName() {

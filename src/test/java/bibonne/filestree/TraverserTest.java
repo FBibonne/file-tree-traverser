@@ -51,7 +51,7 @@ class TraverserTest {
         FilesUtils filesUtils = new FilesUtilsMock(new FilesUtilsFromJdkFiles(), List.of());
         SizeResult sizeResult = SizeResult.root(root, filesUtils);
         var traverser= Traverser.browseFor(sizeResult);
-        assertThat(traverser.call()).hasToString("""
+        assertThat(traverser).hasToString("""
                 test-classes : 6.52
                   _NEG_ : 1.86
                   wav : 1.86
@@ -68,25 +68,25 @@ class TraverserTest {
     void call_withConvertResult() throws Exception {
         Path root = Path.of(TraverserTest.class.getClassLoader().getResource(".").toURI());
         List<ConverterCall> expectedCalls = List.of(
-                new ConverterCall(root.resolve("wav"), Path.of("beatles.wav"), "beatles.mp3"),
-        new ConverterCall(root.resolve("wav"), Path.of("renaud.wav"), "renaud.mp3"),
-        new ConverterCall(root.resolve("opus"), Path.of("grand corps.opus"), "grand corps.mp3"),
-        new ConverterCall(root.resolve("flac"), Path.of("zebda.flac"), "zebda.mp3"),
-        new ConverterCall(root.resolve("opus"), Path.of("goldman.opus"), "goldman.mp3"),
-        new ConverterCall(root.resolve("flac/mano negra"), Path.of("a.flac"), "a.mp3")
+                new ConverterCall(root.resolve("wav"), "beatles.wav", "beatles.mp3"),
+        new ConverterCall(root.resolve("wav"), "renaud.wav", "renaud.mp3"),
+        new ConverterCall(root.resolve("opus"), "grand corps.opus", "grand corps.mp3"),
+        new ConverterCall(root.resolve("flac"), "zebda.flac", "zebda.mp3"),
+        new ConverterCall(root.resolve("opus"), "goldman.opus", "goldman.mp3"),
+        new ConverterCall(root.resolve("flac/mano negra"), "a.flac", "a.mp3")
         );
         ConverterSpyer converterSpyer = new ConverterSpyer();
         List<Path> deletedSpy=Collections.synchronizedList(new ArrayList<>());
         FilesUtilsMock filesUtils = new FilesUtilsMock(new FilesUtilsFromJdkFiles(), deletedSpy);
         ConvertResult convertResult = new ConvertResult(root, converterSpyer, filesUtils);
-        Traverser.browseFor(convertResult).call();
+        Traverser.browseFor(convertResult);
         assertThat(converterSpyer.spy).hasSize(expectedCalls.size())
                 .containsAll(expectedCalls);
         assertThat(deletedSpy).hasSize(expectedCalls.size())
-                .containsAll(expectedCalls.stream().map(call->call.directory.resolve(call.srcFile)).toList());
+                .containsAll(expectedCalls.stream().map(call->call.directory.resolve(call.srcFilename)).toList());
     }
 
-    record ConverterCall(Path directory, Path srcFile, String targetFilename) {
+    record ConverterCall(Path directory, String srcFilename, String targetFilename) {
     }
 
     static class ConverterSpyer extends MusicConverter{
@@ -94,7 +94,7 @@ class TraverserTest {
         List<ConverterCall> spy = Collections.synchronizedList(new ArrayList<>());
 
         @Override
-        public boolean convert(Path directory, Path fileName, String targetFilename) {
+        public boolean convert(Path directory, String fileName, String targetFilename) {
             spy.add(new ConverterCall(directory, fileName, targetFilename));
             return true;
         }

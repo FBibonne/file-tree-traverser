@@ -5,9 +5,9 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class MusicConverter {
-    public boolean convert(Path directory, Path fileName, String targetFilename) {
+    public boolean convert(Path directory, String fileName, String targetFilename) {
         //ffmpeg -y -i "$sansext.opus" "$sansext.flac"
-        List<String> command = List.of("ffmpeg", "-y", "-i", fileName.toString(), targetFilename);
+        List<String> command = List.of("ffmpeg", "-y", "-i", fileName, targetFilename);
         ProcessBuilder pb = new ProcessBuilder(command);
         System.out.println("*** LAUNCH "+command+" ***");
         pb.directory(directory.toFile());

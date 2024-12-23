@@ -1,8 +1,8 @@
 package bibonne.filestree.convertmusic;
 
+import bibonne.filestree.external.FilesUtilsFromJdkFiles;
 import bibonne.filestree.traverser.BrowseResult;
 import bibonne.filestree.utils.FilesUtils;
-import bibonne.filestree.external.FilesUtilsFromJdkFiles;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -16,59 +16,53 @@ public record ConvertResult(Path currentDirectory, MusicConverter musicConverter
     }
 
     @Override
-    public BrowseResult child(Path childDirectory) {
-        return new ConvertResult(childDirectory, musicConverter, filesUtils);
+    public BrowseResult child(Path subdirectory) {
+        return new ConvertResult(subdirectory, musicConverter, filesUtils);
     }
 
     @Override
-    public void addFilePath(Path path) {
-        if (isNotWmaorMp3(path)){
-            convertToMp3(path);
+    public void processFile(Path path) {
+        var pathWithExtension = filesUtils.pathWithExtension(path);
+        if (isMusicFileToBeConverted(pathWithExtension.extension())){
+            convertToMp3(path, pathWithExtension);
         }
     }
 
-    private void convertToMp3(Path path) {
-        if (this.musicConverter.convert(path.getParent(), path.getFileName(), newFilenameWithMp3(path))){
+    private void convertToMp3(Path path, FilesUtils.PathWithExtension pathWithExtension) {
+        if (this.musicConverter.convert(path.getParent(), pathWithExtension.filename(), newFilenameWithMp3(pathWithExtension))){
             filesUtils.deleteSafely(path);
         }else {
-            System.err.println(STR."ERROR while converting file \{path} to mp3 file");
+            System.err.println("ERROR while converting file "+path+" to mp3 file");
         }
     }
 
-    private String newFilenameWithMp3(Path path) {
-        String filename = path.getFileName().toString();
-        int lastDot = filename.lastIndexOf('.');
-        return STR."\{filename.substring(0, lastDot)}.mp3";
+    private String newFilenameWithMp3(FilesUtils.PathWithExtension pathWithExtension) {
+       return pathWithExtension.filenameWithoutExtension()+".mp3";
     }
 
-    private boolean isNotWmaorMp3(Path path) {
-        var fileName = path.getFileName().toString();
-        var extension = extension(fileName).map(String::toLowerCase);
-        return extension.isPresent() && isMusicFile(extension.get()) && ! isMp3(extension.get()) && ! isWma(extension.get());
+    private boolean isMusicFileToBeConverted(Optional<String> extension) {
+        var lowerCaseExtension = extension.map(String::toLowerCase);
+        return isMusicFile(lowerCaseExtension) && isToBeConverted(lowerCaseExtension.get());
     }
 
-    private boolean isWma(String extensionToLowerCase) {
+    private static boolean isToBeConverted(String extension) {
+        return !isMp3(extension) && !isWma(extension);
+    }
+
+    private static boolean isMusicFile(Optional<String> extension) {
+        return extension.isPresent() && isMusicFile(extension.get());
+    }
+
+    private static boolean isWma(String extensionToLowerCase) {
         return "wma".equals(extensionToLowerCase);
     }
 
-    private boolean isMp3(String extensionToLowerCase) {
+    private static boolean isMp3(String extensionToLowerCase) {
         return "mp3".equals(extensionToLowerCase);
     }
 
-    private static Optional<String> extension(String fileName) {
-        int lastDot = fileName.lastIndexOf('.');
-        if (lastDot == -1) return Optional.empty();
-        if (lastDot < fileName.length() - 1) return Optional.of(fileName.substring(lastDot + 1));
-        //filename ends with a dot :
-        return Optional.empty();
-    }
-
-    private boolean isMusicFile(String extensionToLowerCase) {
+    private static boolean isMusicFile(String extensionToLowerCase) {
         return MUSIC_EXTENSION.contains(extensionToLowerCase);
     }
-
-    @Override
-    public BrowseResult afterTraverse() {
-        return this;
-    }
+    
 }
