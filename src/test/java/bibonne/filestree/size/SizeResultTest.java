@@ -2,13 +2,11 @@ package bibonne.filestree.size;
 
 import bibonne.filestree.external.FilesUtilsFromJdkFiles;
 import bibonne.filestree.utils.FilesUtils;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class SizeResultTest {

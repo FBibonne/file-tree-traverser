@@ -4,23 +4,25 @@ import bibonne.filestree.traverser.BrowseResult;
 import bibonne.filestree.utils.FilesUtils;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 import static java.lang.System.lineSeparator;
 import static java.util.Objects.requireNonNull;
 
 public class SizeResult implements BrowseResult {
 
-    private static final double TO_GIGA_COEFF = Math.pow(1024, 3);
     public static final long THREATHOLD = 1_000_000_000L;
+
     private final Path directory;
     protected final FilesUtils filesUtils;
+    private final List<SizeResult> children = new ArrayList<>();
 
-    private Size totalSize=new Size(0);
+    private Size totalSize= Size.ZERO;
+    private Size negileableSize= Size.ZERO;
 
-    private Size negileableSize=new Size(0);
-
-    private final List<SizeResult> children;
 
 
     public static SizeResult root(Path rootDirectory, FilesUtils filesUtils) {
@@ -41,7 +43,6 @@ public class SizeResult implements BrowseResult {
 
     protected SizeResult(Path directory, FilesUtils filesUtils) {
         this.directory = requireNonNull(directory);
-        this.children = new ArrayList<>();
         this.filesUtils = requireNonNull(filesUtils);
     }
 
@@ -63,6 +64,7 @@ public class SizeResult implements BrowseResult {
     @Override
     public SizeResult aggregate() {
         updateSizes();
+        children.sort(Comparator.comparingLong(sizeResult -> sizeResult.totalSize.value()));
         return this;
     }
 
@@ -71,17 +73,17 @@ public class SizeResult implements BrowseResult {
     }
 
     void updateSizes() {
-        for (int i = 0; i < children.size(); i++) {
-            var child = children.get(i);
-            if (child.isNegligeable()){
-                negileableSize=negileableSize.add(child.totalSize());
-                children.remove(i);
-                i=i-1;
-            }else{
-                this.totalSize=this.totalSize.add(child.totalSize());
-            }
-        }
+        children.removeIf(this::isToBeRemovedFromChildren);
         this.totalSize=this.totalSize.add(this.negileableSize);
+    }
+
+    private boolean isToBeRemovedFromChildren(SizeResult child) {
+        if (child.isNegligeable()){
+            negileableSize=negileableSize.add(child.totalSize());
+            return true;
+        }
+        this.totalSize=this.totalSize.add(child.totalSize());
+        return false;
     }
 
     public boolean isNegligeable() {
@@ -111,7 +113,7 @@ public class SizeResult implements BrowseResult {
         var toString=new StringBuilder("""
         %s%s : %.2f
         %s  _NEG_ : %.2f"""
-                .formatted(indent, directoryName(), toGiga(totalSize), indent, toGiga(negileableSize))
+                .formatted(indent, directoryName(), totalSize.toGiga(), indent, negileableSize.toGiga())
         );
         for (var browseResult:children){
             toString.append(lineSeparator()).append(browseResult.toString(indent+"  "));
@@ -124,7 +126,4 @@ public class SizeResult implements BrowseResult {
         return fileName==null?this.directory.toString():fileName.toString();
     }
 
-    private double toGiga(Size totalSize) {
-        return totalSize.value() / TO_GIGA_COEFF;
-    }
 }

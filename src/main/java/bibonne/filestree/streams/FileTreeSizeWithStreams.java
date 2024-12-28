@@ -16,10 +16,10 @@ public class FileTreeSizeWithStreams {
     public static void main(String[] args) {
         SizeResult root = SizeResult.root(getRootPath(args), new FilesUtilsFromJdkFiles());
         Stream.of(root)
+                .parallel()
                 .mapMulti(FileTreeSizeWithStreams::childrenToStream)
-                .forEach(sizeResult -> {
-                    if(sizeResult==root) System.out.println(sizeResult);
-                });
+                .filter(s-> s==root)
+                .forEach(System.out::println);
     }
 
     static void childrenToStream(SizeResult current, Consumer<SizeResult> consumer) {

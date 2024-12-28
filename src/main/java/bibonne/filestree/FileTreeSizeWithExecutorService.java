@@ -8,9 +8,9 @@ import java.util.concurrent.ExecutionException;
 
 import static bibonne.filestree.utils.TraverseUtils.getRootPath;
 
-public class FileTreeSize {
+public class FileTreeSizeWithExecutorService {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        System.out.println(Traverser.browseFor(SizeResult.root(getRootPath(args), new FilesUtilsFromJdkFiles())));
+        System.out.println(Traverser.browseWithExecutorServiceFor(SizeResult.root(getRootPath(args), new FilesUtilsFromJdkFiles())));
     }
 }

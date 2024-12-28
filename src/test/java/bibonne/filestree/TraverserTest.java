@@ -54,14 +54,14 @@ class TraverserTest {
         assertThat(traverser).hasToString("""
                 test-classes : 6.52
                   _NEG_ : 1.86
+                  wma : 0.93
+                    _NEG_ : 0.93
                   wav : 1.86
                     _NEG_ : 1.86
                   flac : 1.86
                     _NEG_ : 0.00
                     mano negra : 1.86
-                      _NEG_ : 1.86
-                  wma : 0.93
-                    _NEG_ : 0.93""");
+                      _NEG_ : 1.86""");
     }
 
     @Test
