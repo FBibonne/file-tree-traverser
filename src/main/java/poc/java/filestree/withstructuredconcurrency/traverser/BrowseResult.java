@@ -1,4 +1,4 @@
-package bibonne.filestree.traverser;
+package poc.java.filestree.withstructuredconcurrency.traverser;
 
 import java.nio.file.Path;
 
@@ -23,7 +23,5 @@ public interface BrowseResult {
     /// Aggregates the results of this instance related to the files of the [`currentDirectory()`](#currentDirectory())
     /// and the results of all its subdirectories
     ///
-    default BrowseResult aggregate(){
-        return this;
-    }
+    BrowseResult aggregate();
 }

@@ -1,8 +1,8 @@
-package bibonne.filestree.size;
+package poc.java.filestree.withstructuredconcurrency.size;
 
-import bibonne.filestree.external.FilesUtilsFromJdkFiles;
-import bibonne.filestree.utils.FilesUtils;
 import org.junit.jupiter.api.Test;
+import poc.java.filestree.withstructuredconcurrency.external.FilesUtilsFromJdkFiles;
+import poc.java.filestree.withstructuredconcurrency.utils.FilesUtils;
 
 import java.nio.file.Path;
 import java.util.Map;

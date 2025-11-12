@@ -1,4 +1,4 @@
-package bibonne.filestree.traverser;
+package poc.java.filestree.withstructuredconcurrency.traverser;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -12,10 +12,6 @@ public class Traverser {
     private Traverser(){}
 
     public static BrowseResult browseFor(BrowseResult browseResult) throws InterruptedException, ExecutionException {
-        return executor.invokeAll(List.of(new InternalTraverser(browseResult))).getFirst().get();
-    }
-
-    public static BrowseResult browseWithExecutorServiceFor(BrowseResult browseResult) throws InterruptedException, ExecutionException {
         return executor.invokeAll(List.of(new InternalTraverser(browseResult))).getFirst().get();
     }
 

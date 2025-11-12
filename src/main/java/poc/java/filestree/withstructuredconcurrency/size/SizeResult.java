@@ -1,7 +1,7 @@
-package bibonne.filestree.size;
+package poc.java.filestree.withstructuredconcurrency.size;
 
-import bibonne.filestree.traverser.BrowseResult;
-import bibonne.filestree.utils.FilesUtils;
+import poc.java.filestree.withstructuredconcurrency.traverser.BrowseResult;
+import poc.java.filestree.withstructuredconcurrency.utils.FilesUtils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class SizeResult implements BrowseResult {
     }
 
 
-    protected SizeResult(Path directory, FilesUtils filesUtils) {
+    SizeResult(Path directory, FilesUtils filesUtils) {
         this.directory = requireNonNull(directory);
         this.filesUtils = requireNonNull(filesUtils);
     }

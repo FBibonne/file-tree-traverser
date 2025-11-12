@@ -1,4 +1,4 @@
-package bibonne.filestree.utils;
+package poc.java.filestree.withstructuredconcurrency.utils;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;

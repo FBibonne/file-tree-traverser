@@ -1,6 +1,6 @@
-package bibonne.filestree.external;
+package poc.java.filestree.withstructuredconcurrency.external;
 
-import bibonne.filestree.utils.FilesUtils;
+import poc.java.filestree.withstructuredconcurrency.utils.FilesUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,12 +33,4 @@ public record FilesUtilsFromJdkFiles()implements FilesUtils {
         }
     }
 
-    @Override
-    public void deleteSafely(Path path) {
-        try {
-            Files.delete(path);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-    }
 }

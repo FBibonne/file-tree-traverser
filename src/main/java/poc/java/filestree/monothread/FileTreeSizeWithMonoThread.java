@@ -1,10 +1,10 @@
-package bibonne.filestree.monothread;
+package poc.java.filestree.monothread;
 
-import bibonne.filestree.external.FilesUtilsFromJdkFiles;
-import bibonne.filestree.size.SizeResult;
-import bibonne.filestree.utils.FilesUtils;
+import poc.java.filestree.withstructuredconcurrency.external.FilesUtilsFromJdkFiles;
+import poc.java.filestree.withstructuredconcurrency.size.SizeResult;
+import poc.java.filestree.withstructuredconcurrency.utils.FilesUtils;
 
-import static bibonne.filestree.utils.TraverseUtils.getRootPath;
+import static poc.java.filestree.withstructuredconcurrency.utils.TraverseUtils.getRootPath;
 
 public class FileTreeSizeWithMonoThread {
 
@@ -12,7 +12,7 @@ public class FileTreeSizeWithMonoThread {
 
     public static void main(String[] args) {
         SizeResult root = SizeResult.root(getRootPath(args), new FilesUtilsFromJdkFiles());
-        computeRecursive(root);
+        Thread.startVirtualThread(()->computeRecursive(root));
         System.out.println(root);
     }
 

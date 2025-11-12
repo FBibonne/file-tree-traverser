@@ -1,7 +1,7 @@
-package bibonne.filestree;
+package poc.java.filestree;
 
-import bibonne.filestree.external.FilesUtilsFromJdkFiles;
-import bibonne.filestree.utils.FilesUtils;
+import poc.java.filestree.withstructuredconcurrency.external.FilesUtilsFromJdkFiles;
+import poc.java.filestree.withstructuredconcurrency.utils.FilesUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record FilesUtilsMock(FilesUtilsFromJdkFiles delegate, List<Path> deletedSpy) implements FilesUtils {
+public record FilesUtilsFake(FilesUtilsFromJdkFiles delegate, List<Path> deletedSpy) implements FilesUtils {
 
     @Override
     public boolean isDirectorySafely(Path path) {
@@ -28,11 +28,6 @@ public record FilesUtilsMock(FilesUtilsFromJdkFiles delegate, List<Path> deleted
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public void deleteSafely(Path path) {
-        deletedSpy.add(path);
     }
 
 

@@ -1,7 +1,7 @@
-package bibonne.filestree.traverser;
+package poc.java.filestree.withstructuredconcurrency.traverser;
 
-import bibonne.filestree.utils.FilesUtils;
-import bibonne.filestree.external.FilesUtilsFromJdkFiles;
+import poc.java.filestree.withstructuredconcurrency.utils.FilesUtils;
+import poc.java.filestree.withstructuredconcurrency.external.FilesUtilsFromJdkFiles;
 
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
@@ -16,7 +16,15 @@ record InternalTraverser(BrowseResult result, FilesUtils filesUtils) implements 
 
     @Override
     public BrowseResult call() {
-        try(var scope=new StructuredTaskScope.ShutdownOnFailure() ; var files = listAllFiles(result.currentDirectory())){
+        if (! Thread.currentThread().isInterrupted()) {
+            processCurrentDirectory();
+            return result.aggregate();
+        }
+        throw new RuntimeException("Process of "+result.currentDirectory()+" was interrupted");
+    }
+
+    private void processCurrentDirectory() {
+        try(var scope=StructuredTaskScope.open() ; var files = listAllFiles(result.currentDirectory())){
             files.forEach(path -> {
                 if (isDirectory(path)){
                     scope.fork(new InternalTraverser(result.child(path), filesUtils));
@@ -29,7 +37,6 @@ record InternalTraverser(BrowseResult result, FilesUtils filesUtils) implements 
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
-        return result.aggregate();
     }
 
     private boolean isDirectory(Path path) {

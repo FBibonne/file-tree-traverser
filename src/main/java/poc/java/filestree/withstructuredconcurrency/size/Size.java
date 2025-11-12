@@ -1,4 +1,4 @@
-package bibonne.filestree.size;
+package poc.java.filestree.withstructuredconcurrency.size;
 
 public record Size(long value) {
 
